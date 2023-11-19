@@ -4,47 +4,48 @@ title: Continuous Deployment - cuz less hassle
 permalink: continuous-travis
 ---
 
-# Continuous Deployment with Travis
+# Travisによる継続的デプロイ
 
-*Created by Floor Drees, [@floordrees](https://twitter.com/floordrees)* 
+*Created by Floor Drees, [@floordrees](https://twitter.com/floordrees)* / *翻訳者: Masato Yamashita, [@M_Yamashii](https://twitter.com/M_Yamashii)*
 
-### What is this Continuous Deployment thing?
+### 継続的デプロイとは何か？
 
-Continuous deployment is part of the continuous delivery 'movement'. The idea behind continuous delivery is to automate the software delivery process as far as possible. 
+継続的デプロイは継続的デリバリーの活動の1つです。継続的デリバリーの背景にある考えは、可能な限りソフトウェアのデリバリープロセスを自動化することです。
 
-With a working continuous deployment chain in place you'll enforce Git deployments (everything must be committed to be tested and everything must be tested to be deployed), making collaboration easier and deployment faster. So you can focus on making your app even more awesome!
+継続的デプロイ・チェーンを構築できていれば、Gitを使ったデプロイ（すべてをコミットすることでテストが実行され、全テストが実行完了することでデプロイされること）を強制でき、それによってコラボレーションが容易になり、デプロイが高速化されます。そのため、開発者はアプリケーションをより素晴らしくすることに集中できます！
 
-There are a few great companies sailing the continuous wave, in this guide we'll set up continuous deployment for our Ruby on Rails app from GitHub to anynines, using [Travis-ci](http://about.travis-ci.org/). 
+この継続的デプロイという波に乗って航行している素晴らしい会社があります。このガイドでは、[Travis-ci](http://about.travis-ci.org/)を使って、GitHubからanyninesへのRuby on Railsアプリケーションの継続的デプロイを設定します。
 
-__COACH__: Talk about the benefits of continuous deployment.
+__COACH__: 継続的デプロイのメリットについて話してください。
 
-###Github, Travis CI and anynines
+### Github、Travis CI、anynines
 
-The first thing we need is an app in a Github repository. And we have just that! Next you'll need to make sure you followed the guide on how to deploy your app via anynines until the very last step.
+まず必要なのは、GitHubのリポジトリにあるアプリです。これはすでにありますね！次に、anyninesを使ってアプリをデプロイする方法のガイドを、最後まで読んでおきましょう。
 
-Then, we need to create a file called `manifest.yml` in the main directory of your app, so we can save some information about the deployment there. In your terminal run:
+<!-- TODO メインディレクトリではなくルートが良いのかも -->
+次に、アプリのルートディレクトリに、デプロイに関する情報をもったファイルである`manifest.yml`を作成します。ターミナルで以下を実行してください。
 
 {% highlight sh %}
 cf push
 {% endhighlight %}
 
-This will trigger a first deployment to anynines. The cf gem will notice that there is no `manifest.yml` and will ask you a standard set of configuration questions such as the desired number and memory size of your app instances, whether and which services to bind to them and most importantly, whether you want to store this information.
-Please answer this question with a 'hell yes' as it will create the desired `manifest.yml` file!
+このコマンドを実行すると、anyninesへの初回デプロイが開始されます。cf gemは`manifest.yml`がないことに気づき、アプリのインスタンス数やメモリサイズ、どのサービスをバインドするか、そして一番重要となるこの情報を保存するかどうかなど、標準的な設定に関する質問をしてきます。
+この質問に'yes'と答えると、`manifest.yml`が作成されます。
 
-Once your push was successful, you should be able to access your application using a browser of your choice, which means your are ready to setup Travis!
+プッシュが成功すると、好きなブラウザでアプリケーションにアクセスできるようになります。これでTravisの設定の準備完了です。
 
-For now we don't have 'real tests', so we will go ahead and create a Travis configuration file that will fake a succeeding test suite. Please go to your local app directory and create a ``.travis.yml`` file. At the moment, paste the following content. We’ll add some more information later on, using the Travis gem.
+今のところ'本物のテスト'を持ってないので、先に進み、テストが成功したことにするTravisの設定ファイルを作成します。ローカルのアプリディレクトリに移動し、``.travis.yml``ファイルを作成してください。いったん以下の内容を貼り付けておいてください。後でTravis gemを使って、情報を追加します。
 
 {% highlight sh %}
 language: ruby
 script: 'true'
 {% endhighlight %}
 
-Your app now contains the Travis configuration but how should Travis know when to pull your code from Github and trigger test execution? This is where Github hooks come into play!
+アプリにはTravisの設定が含まれていますが、Githubからコードを取得しテストを実行するトリガーのタイミングを、Travisはどうやって知ることができるのでしょうか？ここではGitHubのフックが役に立ちます！
 
-#### Travis CI Github hook activation
+#### Travis CI Githubフックの有効化
 
-Commit and push a code change to your repository and check travis-ci.org to see if your test suite is being executed. You should also receive an email that your build succeeded.
+変更したコードをコミットしてリポジトリにプッシュし、テストが実行されているかどうかtravis-ci.orgを確認してください。ビルドが成功したことを知らせるメールも届くはずです。
 
 {% highlight sh %}
 git add .  
@@ -52,25 +53,25 @@ git commit -m "test Travis integration"
 git push origin master
 {% endhighlight %}
 
-Now we can configure the actual deployment.
-Let's use the travis gem:
+これでactual deploymentを設定できるようになります。
+travis gemを使いましょう。
 {% highlight sh %}
 gem install travis
 {% endhighlight %}
 
-Now use the `travis` command to setup the anynines deployment.
+`travis`コマンドを使ってanyninesへのデプロイを設定しましょう。
 {% highlight sh %}
 travis setup cloudfoundry
 {% endhighlight %}
 
-In case you don’t know the anynines target URL use
+anyninesのURLがわからない場合は、以下コマンドを実行してください。
 {% highlight sh %}
 cf target
 {% endhighlight %}
 
-to gather all information required for Travis setup. This includes target url, username, the organization and space you are currently using. You can also take a look-see at the welcome mail you have received after signing up at anynines.com.
+このコマンドでTravisのセットアップに必要な全ての情報を集められます。この情報には、url、ユーザー名、現在使っている組織とスペースが含まれます。anynines.comにサインアップした後に受け取ったウェルカムメールも参考にしてください。
 
-After the `travis` command has finished, your ``.travis.yml`` should look somewhat like this:
+`travis`コマンドが終了したら、``.travis.yml``は以下のようになっているはずです。
 {% highlight sh %}
 language: ruby
 script: 'true'
@@ -86,9 +87,9 @@ deploy:
     repo: jane/railsgirls
 {% endhighlight %}
 
-Don’t forget to commit and push your changes to ``.travis.yml`` as it will be required in your Github repository to take effect.
+GitHubリポジトリに変更を反映させるために、`.travis.yml`の変更のコミット、プッシュを忘れないでください。
 
-From now on whenever you commit changes to your Github repository, tests will be run and your app is being deployed. Travis will then show a log output similar to this:
+今後GitHubリポジトリに変更をコミットするたびに、テストが実行されアプリがデプロイされます。その際、Travisはこのようなログを出力します。
 
 {% highlight sh %}
 Installing deploy dependencies
@@ -159,4 +160,4 @@ Push successful! App 'railsgirls' available at http://railsgirls.de.a9sapp.eu
 Logging out... OK
 {% endhighlight %}
 
-This means your are done and good to go! 
+これで完了です！
